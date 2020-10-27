@@ -1,14 +1,6 @@
 # RORwithcassandra
 Rails App talking to Cassandra cluster
 
-### Local Development (non docker)
-
-```bash
-$ make local
-```
-
-This command starts a local development server and open up a browser window. Most changes are reflected live without having to restart the server.
-
 ### Steps to deploy RubyonRails application using Cassandra
 
 - Steps to follow to deploy ruby on rails applications to kubernetes cluster using Helm Charts and Jenkins pipeline and JobDSL plugin
