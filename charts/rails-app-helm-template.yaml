@@ -1,0 +1,113 @@
+---
+# Source: rails-app/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: RELEASE-NAME-rails-app
+  labels:
+    helm.sh/chart: rails-app-0.1.0
+    app.kubernetes.io/name: rails-app
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: LoadBalancer
+  ports:
+  # I have set both ports to 3000
+    - port: 3000
+      targetPort: 3000
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: rails-app
+    app.kubernetes.io/instance: RELEASE-NAME
+---
+# Source: rails-app/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: RELEASE-NAME-rails-app
+  labels:
+    helm.sh/chart: rails-app-0.1.0
+    app.kubernetes.io/name: rails-app
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: rails-app
+      app.kubernetes.io/instance: RELEASE-NAME
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: rails-app
+        app.kubernetes.io/instance: RELEASE-NAME
+    spec:
+      securityContext:
+        {}
+      containers:
+        - name: rails-app
+          securityContext:
+            {}
+          image: "sreenivask/ror-cassandra:1.0.0"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            limits:
+              cpu: 100m
+              memory: 128Mi
+            requests:
+              cpu: 100m
+              memory: 128Mi
+---
+# Source: rails-app/templates/ingress.yaml
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: RELEASE-NAME-rails-app
+  annotations:
+    kubernetes.io/ingress.class: nginx
+spec:
+  rules:
+    - host: 
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              serviceName: RELEASE-NAME-rails-app
+              servicePort: 3000
+---
+# Source: rails-app/templates/tests/test-connection.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "RELEASE-NAME-rails-app-test-connection"
+  labels:
+    helm.sh/chart: rails-app-0.1.0
+    app.kubernetes.io/name: rails-app
+    app.kubernetes.io/instance: RELEASE-NAME
+    app.kubernetes.io/version: "1.16.0"
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['RELEASE-NAME-rails-app:3000']
+  restartPolicy: Never

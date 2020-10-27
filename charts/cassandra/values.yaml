@@ -1,0 +1,19 @@
+# Default values for cassandra.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+name: cassandra
+replicaCount: 3
+
+cassandra:
+  log_level: info
+  affinity: {}
+  image:
+    repository: gcr.io/google-samples/cassandra:v13
+    pullPolicy: Always
+
+ingress:
+  enabled: false
+
+service:
+  type: None
